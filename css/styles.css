@@ -1,0 +1,2130 @@
+/* =====================================================
+   NUVORA — SISTEMA VISUAL
+   Fase 3, pasos 1 a 3: tokens, componentes base, nav y hero.
+   Concepto: catálogo razonado. Cada unidad es una pieza
+   catalogada, no un producto en góndola. De ahí salen las
+   decisiones: hairlines en vez de cajas, datos en monoespaciada,
+   rojo como sello y no como relleno, y mucho aire.
+===================================================== */
+
+
+/* =====================================================
+   1. RESET
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* El atributo hidden tiene que ganarle a cualquier display de clase.
+   Sin esto, reglas como .mini-form-success { display: flex } pisaban
+   la regla [hidden] del navegador y los mensajes de éxito aparecían
+   antes de tiempo. La lógica de mostrar/ocultar sigue siendo la del
+   JS: acá sólo se garantiza que "oculto" signifique oculto. */
+[hidden] {
+    display: none !important;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Etiqueta visible sólo para lectores de pantalla: los campos tienen
+   label asociado sin cambiar el diseño, que usa placeholders. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+
+/* =====================================================
+   2. TOKENS
+   Un solo lugar para color, tipografía, espacio, radios y
+   tiempos. Nada de valores sueltos más abajo.
+===================================================== */
+
+:root {
+    /* --- Escala oscura (carbón cálido) --- */
+    --negro: #0D0B0A;
+    --carbon: #16130F;
+    --carbon-alto: #221E19;
+    --linea-osc: #2E2823;
+    --linea-campo-osc: #6E655B;     /* 3.24:1 sobre carbón: borde de campo válido */
+
+    /* --- Escala clara (marfil / hueso) --- */
+    --marfil: #F3EFE7;
+    --hueso: #E9E3D8;
+    --blanco: #FFFFFF;
+    --linea: #D8D0C2;               /* hairline decorativa */
+    --linea-campo: #8C8375;         /* 3.26:1 sobre marfil: borde de campo válido */
+
+    /* --- Texto --- */
+    --texto: #16130F;               /* 16.15:1 sobre marfil */
+    --texto-2: #6A625A;             /* 5.22:1 sobre marfil */
+    --texto-inv: #F3EFE7;           /* 16.15:1 sobre carbón */
+    --texto-inv-2: #A69E93;         /* 6.99:1 sobre carbón */
+
+    /* --- Rojo: color de carácter. Acción y sello, nunca relleno.
+           Regla: rojo como texto chico NO va sobre fondo oscuro
+           (ahí da 3.15:1); para eso está --rojo-claro. --- */
+    --rojo: #C8102E;                /* blanco encima: 5.88:1 */
+    --rojo-osc: #8E0B20;
+    --rojo-hondo: #4A0710;
+    --rojo-claro: #F26D6D;          /* 6.33:1 sobre carbón */
+
+    /* --- Metálico: aluminio, no bronce. Carrocería, no joyería. --- */
+    --aluminio: #B5AEA3;
+
+    /* --- Tipografía --- */
+    --display: 'Instrument Serif', 'Times New Roman', Georgia, serif;
+    --sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    /* San Francisco no se puede empaquetar (es la fuente del sistema de
+       Apple, no está en Google Fonts): -apple-system la activa nativa en
+       iOS/macOS. En cualquier otro sistema cae a la sans del sitio. Se usa
+       sólo en la cápsula flotante del header mobile. */
+    --sf: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, var(--sans);
+
+    /* --- Espacio --- */
+    --container: 1440px;
+    --gutter: clamp(20px, 5vw, 76px);
+    --section-y: clamp(80px, 9vw, 168px);
+
+    /* --- Material --- */
+    --radio-campo: 2px;
+    --radio-chip: 4px;
+
+    /* --- Movimiento: una sola familia de curvas para todo el sitio --- */
+    --ease-salida: cubic-bezier(0.16, 1, 0.30, 1);
+    --ease-entrada: cubic-bezier(0.55, 0, 0.45, 1);
+    --t-micro: 160ms;
+    --t-corta: 320ms;
+    --t-media: 640ms;
+    --t-larga: 900ms;
+}
+
+
+/* =====================================================
+   3. TIPOGRAFÍA
+   Instrument Serif = display (nunca por debajo de 20px).
+   Archivo = toda la UI y el texto.
+   IBM Plex Mono = dato técnico: specs, referencias, años.
+===================================================== */
+
+body {
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    background: var(--marfil);
+    color: var(--texto);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;             /* red de seguridad: ningún elemento angosto genera scroll lateral */
+}
+
+h1, h2, h3 {
+    font-family: var(--display);
+    font-weight: 400;              /* el display nunca va en bold */
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+}
+
+/* Tamaños base, para que ningún título quede con el valor por defecto
+   del navegador si no cae bajo una regla más específica. */
+h1 { font-size: clamp(38px, 5vw, 72px); }
+h2 { font-size: clamp(32px, 4vw, 58px); }
+h3 { font-size: clamp(22px, 2.2vw, 32px); }
+
+/* LOS NÚMEROS SON PARTE DE LA IDENTIDAD.
+   Precios, cuotas, años, referencias y estadísticas van todos en la
+   monoespaciada, con cifras tabulares: es lo que hace que el catálogo se
+   lea como un registro y no como una góndola. El texto comercial se
+   mantiene en la sans, que es donde tiene que sonar humano. */
+.card-price, .card-oldprice,
+.results-count, .ficha-price, .ficha-oldprice, .ficha-quota-value {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+/* Dato técnico. Es el gesto que convierte una tarjeta de producto
+   en una ficha de archivo. */
+.ficha-spec-k, .badge {
+    font-family: var(--mono);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+
+/* =====================================================
+   4. GLOBAL
+===================================================== */
+
+.container {
+    width: min(calc(100% - var(--gutter) * 2), var(--container));
+    margin-inline: auto;
+}
+
+/* Foco en dos capas: se ve sobre marfil y sobre carbón por igual.
+   Nunca se anima: tiene que aparecer. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--rojo);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--marfil);
+}
+
+.closing-section :where(a, button):focus-visible,
+.hero :where(a, button):focus-visible {
+    box-shadow: 0 0 0 4px var(--carbon);
+}
+
+
+/* =====================================================
+   5. NAV
+   Barra de ancho completo apoyada en una hairline. Se va la
+   cápsula con blur: era el elemento más "SaaS" de la página y
+   costaba compositing en todo el scroll.
+===================================================== */
+
+.hero-nav {
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Cápsula flotante translúcida, igual en desktop y en mobile (antes
+   sólo mobile tenía este tratamiento y desktop usaba una barra de
+   ancho completo con hairline). Vidrio iOS: tinte blanco, blur y
+   sombra propios — visible todo el tiempo, así que ya no hace falta
+   un fondo sólido aparte al hacer scroll (ver .hero-nav.scrolled
+   más abajo, que ahora sólo cambia el color del texto). */
+.hero-nav-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 24px;
+
+    width: min(calc(100% - var(--gutter) * 2), var(--container));
+    margin: 12px auto 0;
+    padding: 16px 28px;
+
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.hero-nav-inner > * { position: relative; }
+
+.brand {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--texto-inv);
+    white-space: nowrap;
+    transition: color var(--t-corta) var(--ease-salida);
+}
+
+/* Sobre el hero el texto es claro; al hacer scroll, la cápsula queda
+   sobre fondos claros y el texto pasa a oscuro (mismo mecanismo que
+   .hero-menu a y .hero-burger más abajo). */
+.hero-nav.scrolled .brand { color: var(--texto); }
+
+/* Pero el Cierre, al final, es una sección oscura: ahí el texto
+   oscuro quedaría negro sobre negro. initNavContrast marca .over-dark
+   cuando esa sección pasa por debajo de la cápsula y el texto vuelve
+   a claro. */
+.hero-nav.scrolled.over-dark .brand { color: var(--texto-inv); }
+
+/* Isotipo real: un solo archivo, assets/brand/logo.png. Único lugar a
+   tocar para reemplazarlo el día que haya un logo definitivo — no hace
+   falta cambiar HTML ni ninguna otra regla, el alto lo pone esta clase.
+   Nombre .site-logo (no .brand-logo) para no chocar con .brand-logo de
+   la franja "Marcas que trabajamos" más abajo, que es otro componente. */
+/* Ahora el logo es el lockup completo (dibujo + nombre), no el isotipo
+   suelto: necesita más alto para que el texto de la imagen se lea. */
+.site-logo {
+    display: block;
+    height: 46px;
+    width: auto;
+    flex-shrink: 0;
+    transition: transform var(--t-corta) var(--ease-salida);
+}
+
+.brand:hover .site-logo { transform: scale(1.04); }
+
+/* Logo del footer: mismo lockup icono + wordmark, un poco más grande
+   porque ahí no compite con el resto del nav. */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--texto-inv);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+.site-logo--footer { height: 52px; }
+
+.hero-menu {
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    gap: 34px;
+}
+
+.hero-menu a {
+    position: relative;
+    color: rgba(243, 239, 231, 0.78);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    padding-bottom: 3px;
+    transition: color var(--t-micro) var(--ease-salida);
+}
+
+/* Subrayado que se dibuja de izquierda a derecha. */
+.hero-menu a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--rojo);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--t-micro) var(--ease-salida);
+}
+
+.hero-menu a:hover { color: var(--texto-inv); }
+.hero-menu a:hover::after { transform: scaleX(1); }
+.hero-nav.scrolled .hero-menu a { color: rgba(22, 19, 15, 0.78); }
+.hero-nav.scrolled .hero-menu a:hover { color: var(--texto); }
+.hero-nav.scrolled.over-dark .hero-menu a { color: rgba(243, 239, 231, 0.82); }
+.hero-nav.scrolled.over-dark .hero-menu a:hover { color: var(--texto-inv); }
+
+.hero-nav-actions {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-nav-cta {
+    background: var(--rojo);
+    color: var(--blanco);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    padding: 11px 22px;
+    transition: background var(--t-micro) var(--ease-salida);
+}
+
+.hero-nav-cta:hover { background: var(--rojo-osc); }
+
+/* Hamburguesa con dos líneas propias: se va el emoji ☰, que es el
+   detalle que más delata plantilla armada rápido. */
+.hero-burger {
+    display: none;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.hero-burger span {
+    position: absolute;
+    left: 11px;
+    width: 22px;
+    height: 1.5px;
+    background: var(--texto-inv);
+    transition: transform var(--t-micro) var(--ease-salida),
+                opacity var(--t-micro) var(--ease-salida);
+}
+
+.hero-burger span:nth-child(1) { top: 18px; }
+.hero-burger span:nth-child(2) { top: 25px; }
+.hero-burger.is-open span:nth-child(1) { transform: translateY(3.5px) rotate(45deg); }
+.hero-burger.is-open span:nth-child(2) { transform: translateY(-3.5px) rotate(-45deg); }
+
+.mobile-nav {
+    display: none;
+    position: absolute;
+    z-index: 99;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: var(--carbon);
+    border-bottom: 1px solid var(--linea-osc);
+}
+
+.mobile-nav.open { display: flex; }
+
+.mobile-nav a {
+    color: rgba(243, 239, 231, 0.85);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 16px var(--gutter);
+    border-top: 1px solid var(--linea-osc);
+    transition: background var(--t-micro) var(--ease-salida),
+                color var(--t-micro) var(--ease-salida);
+}
+
+.mobile-nav a:hover {
+    color: var(--texto-inv);
+    background: var(--carbon-alto);
+}
+
+
+/* =====================================================
+   6. HERO
+   Full-bleed y cinematográfico. Mismas imágenes, misma lógica
+   de slides: cambia la puesta en escena.
+===================================================== */
+
+.hero {
+    padding: 0;
+    background: var(--carbon);
+    color: var(--texto-inv);
+    display: flow-root;
+}
+
+/* Antes el hero vivía dentro de un contenedor de 82vw con 42px de
+   radio, o sea: una tarjeta grande. Ahora toca los bordes. */
+.hero-shell {
+    width: 100%;
+    margin: 0;
+}
+
+.hero-slider {
+    position: relative;
+    margin-top: 0;
+    height: min(88vh, 860px);
+    min-height: 520px;
+    overflow: hidden;
+    border-radius: 0;
+    background: var(--negro);
+}
+
+/* Bandas de formato: lo que hace que la imagen se lea como fotograma
+   y no como banner. */
+.hero-slider::before,
+.hero-slider::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 28px;
+    background: var(--carbon);
+    z-index: 4;
+    pointer-events: none;
+}
+.hero-slider::before { top: 0; }
+.hero-slider::after { bottom: 0; }
+
+
+/* --- SLIDES --- */
+
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+
+    /* Cortina vertical: la imagen entrante se revela de abajo hacia
+       arriba. Se lee como un corte de montaje, no como un carrusel. */
+    clip-path: inset(100% 0 0 0);
+    transform: scale(1.06);
+    transition: clip-path var(--t-larga) var(--ease-salida),
+                transform 1400ms var(--ease-salida);
+
+    pointer-events: none;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    text-align: left;
+
+    padding: 0 var(--gutter) clamp(56px, 8vh, 104px);
+}
+
+.hero-slide.active {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* El saliente se queda quieto debajo y sólo cede la escala. */
+.hero-slide.prev {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1.03);
+    z-index: 0;
+}
+
+.hero-slide.no-anim,
+.hero-slide.no-anim * {
+    transition: none !important;
+}
+
+/* Las variantes de posición por foto se retiran: en una composición
+   editorial el bloque de texto tiene un solo lugar y eso es lo que da
+   estabilidad al corte entre slides. */
+
+/* Un solo scrim en lugar de cinco gradientes apilados con blend-mode:
+   menos costo de pintado y un resultado más limpio. */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        /* velo superior: el nav va encima de la foto y tiene que leerse
+           sobre cualquier imagen */
+        linear-gradient(to bottom, rgba(13,11,10,0.55) 0%, rgba(13,11,10,0) 16%),
+        linear-gradient(to top, rgba(13,11,10,0.92) 0%, rgba(13,11,10,0.58) 36%, rgba(13,11,10,0.04) 70%),
+        linear-gradient(to right, rgba(13,11,10,0.74) 0%, rgba(13,11,10,0.18) 46%, rgba(13,11,10,0) 72%);
+}
+
+.hero-grain {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    opacity: .045;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+    background-size: 3px 3px;
+}
+
+
+/* --- TEXTO DEL HERO --- */
+
+.hero-copy {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: min(100%, 980px);
+}
+
+.hero-copy p,
+.hero-copy .hero-cta {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--t-media) var(--ease-salida),
+                transform var(--t-media) var(--ease-salida);
+}
+
+.hero-slide.active .hero-copy p         { transition-delay: .52s; }
+.hero-slide.active .hero-copy .hero-cta { transition-delay: .60s; }
+
+.hero-slide.active .hero-copy p,
+.hero-slide.active .hero-copy .hero-cta {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* El título entra línea por línea desde detrás de una máscara. No es un
+   fundido: es el texto subiendo a su lugar, que es como se compone un
+   título en una pieza editorial. */
+.hero-copy .hero-title .l {
+    display: block;
+    overflow: hidden;
+}
+
+.hero-copy .hero-title .l i {
+    display: block;
+    font-style: normal;
+    transform: translateY(105%);
+    transition: transform 1000ms var(--ease-salida);
+}
+
+.hero-slide.active .hero-copy .hero-title .l i { transform: translateY(0); }
+.hero-slide.active .hero-copy .hero-title .l:nth-child(1) i { transition-delay: .26s; }
+.hero-slide.active .hero-copy .hero-title .l:nth-child(2) i { transition-delay: .36s; }
+
+.hero-copy .hero-title {
+    margin: 0;
+    max-width: 14ch;                /* medida de dos líneas, sobre el propio cuerpo del título */
+    color: var(--blanco);
+    font-size: clamp(44px, 6.4vw, 104px);
+    line-height: 0.96;
+    letter-spacing: -0.02em;
+}
+
+/* La escala del título cambia según el largo del texto, como se
+   compondría cada página de una revista: los titulares cortos respiran
+   más grandes. Mismo sistema, distinta composición por slide. */
+.hero-slide:nth-child(2) .hero-copy .hero-title,
+.hero-slide:nth-child(4) .hero-copy .hero-title {
+    font-size: clamp(52px, 8vw, 136px);
+    max-width: 11ch;
+    letter-spacing: -0.03em;
+}
+
+.hero-copy p {
+    margin: 24px 0 0;
+    max-width: 46ch;
+    color: rgba(243, 239, 231, 0.78);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Botón metálico del hero: pill oscuro con una veta de aluminio + rojo
+   que cruza en loop lento (más rápido al hover, en pausa con
+   prefers-reduced-motion) y un aro de sombra que "levanta" el botón
+   al pasar el mouse y lo hunde al click. Todo con capas de background
+   + box-shadow, sin canvas ni librerías — el ripple del click lo
+   agrega js/app.js con un <span> absoluto. */
+.hero-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 36px;
+    padding: 15px 28px 15px 30px;
+    border-radius: 999px;
+    overflow: hidden;
+    color: var(--blanco);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background-image:
+        repeating-linear-gradient(100deg,
+            transparent 0%, rgba(255, 255, 255, .5) 6%, transparent 13%,
+            transparent 28%, rgba(200, 16, 46, .4) 33%, transparent 40%),
+        radial-gradient(120% 160% at 28% -30%, rgba(255, 255, 255, .3), transparent 55%),
+        linear-gradient(155deg, var(--carbon-alto) 0%, var(--negro) 55%, #050403 100%);
+    background-size: 220% 220%, 100% 100%, 100% 100%;
+    background-position: 0% 0%, 0 0, 0 0;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, .5),
+        0 22px 14px rgba(0, 0, 0, .05),
+        0 10px 10px rgba(0, 0, 0, .09),
+        0 3px 6px rgba(0, 0, 0, .16);
+    animation: hero-cta-sheen 7s linear infinite;
+    transition: gap var(--t-micro) var(--ease-salida),
+                box-shadow var(--t-corta) var(--ease-salida),
+                transform var(--t-corta) var(--ease-salida),
+                animation-duration var(--t-corta) var(--ease-salida);
+}
+
+.hero-cta span { position: relative; font-size: 15px; line-height: 0; transition: transform var(--t-micro) var(--ease-salida); }
+
+.hero-cta:hover {
+    gap: 18px;
+    animation-duration: 2.2s;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, .4),
+        0 16px 10px rgba(0, 0, 0, .1),
+        0 8px 8px rgba(0, 0, 0, .14),
+        0 2px 4px rgba(0, 0, 0, .22);
+}
+.hero-cta:hover span { transform: translateX(2px); }
+
+.hero-cta:active {
+    animation-duration: 1s;
+    transform: scale(.97);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), inset 0 2px 4px rgba(0, 0, 0, .4);
+}
+
+.hero-cta .hero-cta-ripple {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, .45) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    animation: hero-cta-ripple .6s ease-out forwards;
+}
+
+@keyframes hero-cta-sheen {
+    to { background-position: -220% -140%, 0 0, 0 0; }
+}
+
+@keyframes hero-cta-ripple {
+    from { transform: scale(0); opacity: .6; }
+    to { transform: scale(4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-cta { animation: none; }
+    .hero-cta:hover { animation-duration: 0s; }
+}
+
+
+/* =====================================================
+   7. WHATSAPP FLOTANTE
+   El verde sobrevive sólo acá, que es donde la gente lo
+   reconoce por forma y color. Dentro del contenido, los CTA
+   de WhatsApp usan el sistema.
+===================================================== */
+
+.whatsapp-float {
+    position: fixed;
+    z-index: 100;
+    right: clamp(16px, 2vw, 32px);
+    bottom: clamp(16px, 2vw, 32px);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #25d366;
+    color: #fff;
+    transition: transform var(--t-micro) var(--ease-salida);
+}
+
+.whatsapp-float:hover { transform: scale(1.06); }
+
+
+/* =====================================================
+   8. MARCAS
+   Planas, en escala de grises, apoyadas sobre una hairline.
+   Se van el 3D, la perspectiva y la sombra proyectada.
+===================================================== */
+
+.official-brands {
+    padding: clamp(48px, 6vw, 88px) var(--gutter);
+    background: var(--carbon);
+    color: var(--texto-inv-2);
+    text-align: left;
+}
+
+.official-brands > span {
+    display: block;
+    max-width: var(--container);
+    margin: 0 auto 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--linea-osc);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.brand-logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: clamp(28px, 5vw, 72px);
+    max-width: var(--container);
+    margin-inline: auto;
+}
+
+.brand-logo {
+    position: relative;
+    width: clamp(78px, 9vw, 116px);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: grayscale(100%) brightness(2.6) contrast(0.6);
+    opacity: 0.5;
+    transition: opacity var(--t-micro) var(--ease-salida);
+}
+
+.brand-logo:hover img { opacity: 0.9; }
+
+
+/* =====================================================
+   9. BOTONES
+   Sin rebote, sin sombra, sin radio. La jerarquía la da el
+   color, no el movimiento.
+===================================================== */
+
+.btn-dark, .btn-blue, .btn-outline, .btn-outline-dark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border: none;
+    cursor: pointer;
+    border-radius: 0;
+    padding: 15px 26px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    transition: background var(--t-micro) var(--ease-salida),
+                color var(--t-micro) var(--ease-salida),
+                border-color var(--t-micro) var(--ease-salida);
+}
+
+.btn-dark { background: var(--carbon); color: var(--texto-inv); }
+.btn-dark:hover { background: var(--negro); }
+
+.btn-blue { background: var(--rojo); color: var(--blanco); }
+.btn-blue:hover { background: var(--rojo-osc); }
+
+/* Dentro del contenido el CTA de WhatsApp adopta el sistema: el verde
+   competía con la identidad en dos botones grandes de la página. */
+
+.btn-outline { background: transparent; border: 1px solid rgba(243,239,231,0.5); color: var(--texto-inv); }
+.btn-outline:hover { background: var(--texto-inv); color: var(--carbon); }
+
+.btn-outline-dark { background: transparent; border: 1px solid var(--texto); color: var(--texto); }
+.btn-outline-dark:hover { background: var(--texto); color: var(--marfil); }
+
+
+/* En la sección de contacto el fondo es casi negro: el botón se
+   invierte al marfil de la paleta. */
+.closing-section .btn-dark {
+    background: var(--marfil);
+    color: var(--texto);
+}
+.closing-section .btn-dark:hover { background: var(--blanco); }
+
+.btn-dark:disabled, .btn-blue:disabled, .btn-outline:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Link con regla que se dibuja. */
+.link-underline {
+    position: relative;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--linea-campo);
+    white-space: nowrap;
+    transition: border-color var(--t-micro) var(--ease-salida);
+}
+.link-underline:hover { border-color: var(--rojo); }
+
+.link-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--rojo);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+    transition: color var(--t-micro) var(--ease-salida);
+}
+.link-button:hover { color: var(--rojo-osc); }
+
+
+/* =====================================================
+   10. CAMPOS
+===================================================== */
+
+.select-field, .text-field {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--blanco);
+    border: 1px solid var(--linea-campo);
+    border-radius: var(--radio-campo);
+    padding: 13px 14px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--texto);
+    width: 100%;
+    transition: border-color var(--t-micro) var(--ease-salida);
+}
+
+.select-field::placeholder, .text-field::placeholder { color: var(--texto-2); }
+
+.select-field {
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M1 1l4 4 4-4" stroke="%2316130F" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+}
+
+.select-field:focus,
+.text-field:focus {
+    outline: none;
+    border-color: var(--rojo);
+    box-shadow: inset 0 -2px 0 var(--rojo);
+}
+
+.text-field.is-invalid,
+.select-field.is-invalid {
+    border-color: var(--rojo);
+    box-shadow: inset 0 -2px 0 var(--rojo);
+}
+
+
+/* =====================================================
+   11. ETIQUETAS Y PRECIOS
+===================================================== */
+
+/* Sello rectangular apoyado en el borde de la foto, no pastilla
+   de ecommerce. */
+.badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 10px;
+    padding: 7px 12px;
+    border-radius: 0;
+}
+
+/* Un solo tono: los tres estados que se muestran (Vendido, Reservado,
+   Próximamente) son todos interrupciones de la disponibilidad. La
+   variante clara la usaban las etiquetas comerciales, que ya no existen. */
+.badge-dark { background: var(--rojo); color: var(--blanco); }
+
+.card-price { font-size: 17px; }
+.card-price-group { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.card-oldprice { color: var(--texto-2); font-size: 13px; text-decoration: line-through; }
+
+.check-mark { color: var(--rojo); font-weight: 700; }
+
+
+/* =====================================================
+   12. SECCIONES — base compartida
+   (la recomposición editorial de cada sección entra en los
+   pasos 4 a 7; acá sólo viven los tokens y el ritmo)
+===================================================== */
+
+.featured-section,
+.vehicles-section {
+    padding-block: var(--section-y);
+}
+
+/* El nav es fijo: sin esto, al navegar desde el menú la sección
+   aterriza debajo de la barra y se pierde el título. */
+.vehicles-section {
+    scroll-margin-top: 96px;
+}
+
+.vehicles-section { background: var(--marfil); }
+.featured-section { background: var(--marfil); overflow: hidden; }
+/* El fondo de .closing-section vive en el bloque 17 · CIERRE, más abajo. */
+
+/* Encabezado editorial: metadatos a la izquierda, título a la derecha.
+   Reemplaza al patrón "eyebrow centrado + h2 + subtítulo" que se repetía
+   seis veces y es lo que hace que una página se lea como plantilla. */
+/* Antes eran dos columnas: a la izquierda el número de sección y una
+   etiqueta, a la derecha el título. Se sacaron los dos por decorativos,
+   así que el encabezado es una sola columna y el título arranca contra
+   el margen. Se conservan el aire de abajo y la línea de cierre. */
+.section-head {
+    margin-bottom: clamp(36px, 4vw, 64px);
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--linea);
+}
+
+.section-head-body h2 { max-width: 18ch; }
+
+.section-head-body p {
+    margin-top: 18px;
+    max-width: 54ch;
+    color: var(--texto-2);
+    font-size: 16px;
+}
+
+
+
+.lead {
+    margin: 20px 0 0;
+    color: var(--texto-2);
+    font-size: 17px;
+    line-height: 1.65;
+    max-width: 52ch;
+}
+
+
+/* =====================================================
+   13. DESTACADOS
+===================================================== */
+
+.section-heading-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--linea);
+}
+.section-heading-row h2 {
+    font-size: clamp(30px, 3.6vw, 52px);
+}
+
+.featured-controls {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.featured-track {
+    display: flex;
+    gap: 32px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-padding-left: max(var(--gutter), calc((100vw - var(--container)) / 2));
+    padding: 4px max(var(--gutter), calc((100vw - var(--container)) / 2)) 8px;
+}
+.featured-track::-webkit-scrollbar { display: none; }
+
+.floating-card {
+    flex: 0 0 clamp(260px, 27vw, 360px);
+    scroll-snap-align: start;
+    display: block;
+    color: var(--texto);
+}
+
+.floating-card-media {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--hueso);
+}
+.floating-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t-media) var(--ease-salida);
+}
+/* La tarjeta no se mueve; la foto sí. */
+.floating-card:hover .floating-card-media img { transform: scale(1.04); }
+
+.floating-card-body {
+    padding: 18px 0 0;
+    display: block;
+    border-top: 1px solid var(--linea);
+    margin-top: 18px;
+    transition: border-top-color var(--t-micro) var(--ease-salida);
+}
+.floating-card:hover .floating-card-body { border-top-color: var(--rojo); }
+.floating-card-top { min-width: 0; }
+.floating-card-name {
+    font-family: var(--display);
+    font-size: clamp(19px, 1.5vw, 24px);
+    line-height: 1.15;
+}
+.floating-card-line {
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+}
+.floating-card-price-row { margin-top: 14px; }
+.floating-card-price-row .card-price { font-size: 19px; }
+.floating-card-price-row .card-oldprice { font-size: 12px; }
+
+
+/* =====================================================
+   14. CATÁLOGO
+   (la recomposición completa entra en el paso 4)
+===================================================== */
+
+/* Barra de herramientas, no panel flotante: se apoya en la página entre
+   dos hairlines. Los filtros son un instrumento, no una función que
+   haya que lucir. */
+.search-bar {
+    background: transparent;
+    border: none;
+    /* Sin regla superior: la del encabezado de sección ya cierra arriba y
+       dos hairlines paralelas tan cerca se leen como ruido. */
+    border-bottom: 1px solid var(--linea);
+    border-radius: 0;
+    padding: 0 0 26px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr) auto;
+    gap: 20px 28px;
+    align-items: end;
+    margin-bottom: 40px;
+}
+
+/* Envuelve los 6 campos + el botón. En desktop es "display: contents":
+   desaparece como caja y sus hijos vuelven a ser ítems directos de la
+   grilla de .search-bar, igual que antes. Sólo se convierte en una caja
+   real (panel colapsable) en mobile — ver regla 21. */
+.filters-toggle-row { display: none; }
+.filters-panel { display: contents; }
+
+.filter-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.filter-field label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+}
+
+/* Campos subrayados: sin caja, sin fondo, sin radio. */
+.search-bar .select-field {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--linea-campo);
+    border-radius: 0;
+    padding: 6px 24px 8px 0;
+    font-size: 15px;
+    font-weight: 500;
+    background-position: right 2px center;
+}
+
+.search-bar .select-field:focus {
+    border-bottom-color: var(--rojo);
+    border-bottom-width: 2px;
+    padding-bottom: 7px;
+    box-shadow: none;
+}
+
+/* Un filtro activo se reconoce de un vistazo. */
+.filter-field.is-active label { color: var(--rojo); }
+.filter-field.is-active .select-field { border-bottom-color: var(--rojo); }
+
+.search-bar .btn-blue { align-self: end; }
+
+.results-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--linea);
+    scroll-margin-top: 104px;
+}
+.results-info { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.results-count {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+}
+.select-field--sort { width: auto; min-width: 220px; }
+
+.vehicles-grid {
+    min-height: 200px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(28px, 3vw, 48px) clamp(20px, 2.4vw, 40px);
+}
+
+.car-card {
+    display: block;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--texto);
+    cursor: pointer;
+}
+.car-card-media {
+    position: relative;
+    aspect-ratio: 3/2;
+    border-radius: 16px;
+    background: var(--hueso);
+    overflow: hidden;
+}
+.car-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t-media) var(--ease-salida);
+}
+.car-card:hover .car-card-media img { transform: scale(1.03); }
+
+.car-card-body {
+    padding: 16px 0 0;
+    margin-top: 16px;
+    border-top: 1px solid var(--linea);
+    transition: border-top-color var(--t-micro) var(--ease-salida);
+}
+/* La regla superior se tiñe al pasar por encima: la tarjeta no se mueve. */
+.car-card:hover .car-card-body { border-top-color: var(--rojo); }
+.car-card-name {
+    font-family: var(--display);
+    font-size: clamp(20px, 1.6vw, 26px);
+    line-height: 1.15;
+}
+.car-card-line {
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+}
+.car-card-price-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+}
+.car-card-cta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+    flex-shrink: 0;
+    transition: color var(--t-micro) var(--ease-salida);
+}
+.car-card:hover .car-card-cta { color: var(--rojo); }
+
+.show-more-row { display: flex; justify-content: center; margin-top: 56px; }
+.show-more-row .btn-outline { border-color: var(--linea-campo); color: var(--texto); }
+.show-more-row .btn-outline:hover { background: var(--texto); color: var(--marfil); }
+/* -----------------------------------------------------
+   Estados del catálogo: cargando, error, sin stock y sin
+   resultados. Comparten caja para que se lean como parte del
+   mismo sistema. Sin ilustraciones ni íconos: el mismo registro
+   sobrio del resto de la página.
+   ----------------------------------------------------- */
+.estado-catalogo {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 72px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.estado-catalogo-titulo {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--texto);
+    text-wrap: balance;
+}
+.estado-catalogo-texto {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--texto-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+    text-wrap: pretty;
+}
+.estado-catalogo-accion {
+    margin-top: 10px;
+    appearance: none;
+    border: 1px solid var(--texto);
+    background: none;
+    color: var(--texto);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 22px;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background var(--t-corta) var(--ease-salida),
+                color var(--t-corta) var(--ease-salida);
+}
+.estado-catalogo-accion:hover {
+    background: var(--texto);
+    color: var(--texto-inv);
+}
+.estado-catalogo-accion:disabled { opacity: .55; cursor: default; }
+.estado-catalogo-accion:disabled:hover { background: none; color: var(--texto); }
+
+/* El error es el único que lleva color: es el único que pide una acción
+   por algo que salió mal. */
+.estado-catalogo--error .estado-catalogo-titulo { color: var(--rojo); }
+
+/* -----------------------------------------------------
+   Skeletons. Ocupan el mismo lugar que una tarjeta real —el
+   contenedor de la foto ya tiene aspect-ratio 3/2— así que al
+   llegar los datos no se mueve nada (sin layout shift).
+   ----------------------------------------------------- */
+.car-card--skeleton {
+    pointer-events: none;
+    cursor: default;
+}
+.car-card--skeleton .car-card-media,
+.sk-linea {
+    background: linear-gradient(100deg,
+        rgba(0, 0, 0, .045) 32%,
+        rgba(0, 0, 0, .075) 50%,
+        rgba(0, 0, 0, .045) 68%);
+    background-size: 220% 100%;
+    animation: sk-brillo 1.5s ease-in-out infinite;
+}
+/* Cada línea ocupa EXACTAMENTE la caja de la línea real que reemplaza
+   (nombre 24px, dato 17px + 6 de aire, precio 28px + 16), pero se pinta
+   más finita gracias a background-clip: content-box + padding vertical.
+   Así la barra se ve como un skeleton y el alto total de la tarjeta
+   coincide al pixel con el de la tarjeta cargada: cero layout shift. */
+.sk-linea {
+    box-sizing: border-box;
+    background-clip: content-box;
+    border-radius: 2px;
+}
+.sk-linea--titulo { width: 62%; height: 24px; margin-top: 0;    padding: 5px 0; }
+.sk-linea--dato   { width: 44%; height: 17px; margin-top: 6px;  padding: 3px 0; }
+.sk-linea--precio { width: 34%; height: 28px; margin-top: 16px; padding: 6px 0; }
+
+@keyframes sk-brillo {
+    from { background-position: 180% 0; }
+    to   { background-position: -80% 0; }
+}
+
+/* El brillo es decorativo: quien pidió movimiento reducido ve el mismo
+   bloque quieto, que sigue comunicando "esto está por llegar". */
+@media (prefers-reduced-motion: reduce) {
+    .car-card--skeleton .car-card-media,
+    .sk-linea { animation: none; }
+}
+
+/* -----------------------------------------------------
+   Foto que no carga (ver initFotoRespaldo en catalog-data.js).
+   Se dibuja sobre el mismo <img>, que conserva su tamaño: el
+   contenedor ya reservó el espacio, así que no hay salto.
+   ----------------------------------------------------- */
+.img-sin-foto {
+    background: var(--hueso);
+    position: relative;
+    /* Oculta el ícono de imagen rota del navegador sin ocultar el
+       elemento, que es lo que mantiene el espacio reservado. */
+    color: transparent;
+    object-fit: cover;
+}
+/* La ficha de un vehículo publicado sin ninguna foto reutiliza la misma
+   leyenda sobre el marco de la galería (ver initGaleria en ficha.js). El
+   z-index deja el cartel de "Vendido"/"Reservado" por encima. */
+.ficha-main-img-wrap.img-sin-foto::after { z-index: 0; }
+.ficha-main-img-wrap .badge { z-index: 1; }
+
+.img-sin-foto::after {
+    content: "Foto no disponible";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hueso);
+    color: var(--texto-2);
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: .04em;
+    text-align: center;
+    padding: 8px;
+}
+
+
+/* =====================================================
+   15. NOSOTROS
+   La pausa de confianza entre el catálogo y el cierre. Sección
+   deliberadamente quieta: una imagen grande de borde a borde, un
+   título y un párrafo. Lo único que se mueve es la entrada del
+   bloque, que la maneja el observador de [data-reveal].
+
+   .about-media > * aplica igual a <img> y a <video>: el día que
+   haya video real se reemplaza la etiqueta y no se toca el CSS.
+===================================================== */
+
+.about-section {
+    background: var(--hueso);
+    color: var(--texto);
+    padding-block: var(--section-y);
+    scroll-margin-top: 96px;
+}
+
+/* De borde a borde: la imagen es la sección, no una ilustración
+   metida en una caja. */
+.about-media {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    background: var(--carbon);
+}
+.about-media > * {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.about-text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 96px);
+    align-items: start;
+    margin-top: clamp(40px, 6vw, 88px);
+}
+
+.about-title {
+    font-family: var(--display);
+    font-size: clamp(32px, 4.6vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+}
+
+.about-body p {
+    max-width: 46ch;
+    color: var(--texto-2);
+    font-size: 16.5px;
+    line-height: 1.7;
+}
+
+
+/* =====================================================
+   16. FORMULARIO CHICO
+   Lo usa la ficha del vehículo (la consulta por una unidad). En la
+   home ya no hay formularios: el contacto pasa por WhatsApp.
+===================================================== */
+
+.mini-form { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--linea); }
+.mini-form--standalone { border-top: none; padding-top: 0; margin-top: 0; }
+.mini-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px,100%),1fr)); gap: 12px; }
+.mini-form-msg { margin-top: 12px; }
+
+.mini-form-success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--hueso);
+    border: none;
+    border-left: 2px solid var(--rojo);
+    border-radius: 0;
+    padding: 16px 18px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Modo demo: mismo componente, en aluminio, para no dar a entender
+   que la consulta se envió cuando todavía no hay webhook. */
+.mini-form-success.is-demo {
+    background: transparent;
+    border-left-color: var(--aluminio);
+    box-shadow: inset 0 0 0 1px var(--linea);
+    color: var(--texto-2);
+}
+.mini-form-success.is-demo .check-mark { color: var(--aluminio); }
+
+.mini-form-error { color: var(--rojo); font-size: 13px; font-weight: 600; }
+.mini-form-error a { text-decoration: underline; text-underline-offset: 3px; }
+
+
+/* =====================================================
+   17. CIERRE
+   El remate: el auto alejándose y una sola acción. Al final queda
+   sólo la marca.
+===================================================== */
+
+.closing-section { background: var(--negro); color: var(--texto-inv); padding-block: 0; }
+
+/* Barras del cuadro: se cierran sobre el final del recorrido. --bar
+   es la altura de cada una (6 % abierto, 50 % cerrado), y la escribe
+   initClosingScene con el progreso del scroll. */
+.closing-bars {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+.closing-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--bar, 6%);
+    background: var(--negro);
+}
+.closing-bar--top { top: 0; }
+.closing-bar--bottom { bottom: 0; }
+
+.closing-stage { position: relative; }
+.js-escenas .closing-stage { height: 200vh; }
+
+.closing-frame {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    text-align: center;
+}
+.js-escenas .closing-frame { position: sticky; top: 0; }
+
+.closing-media { position: absolute; inset: 0; }
+.closing-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 50%, transparent 92%);
+    mask-image: radial-gradient(ellipse at center, #000 50%, transparent 92%);
+    will-change: transform, opacity;
+}
+.closing-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(13, 11, 10, .46) 0%, rgba(13, 11, 10, .88) 62%, var(--negro) 96%);
+}
+
+.closing-copy {
+    position: relative;
+    z-index: 5;
+    padding: 0 var(--gutter);
+    transition: opacity var(--t-media) var(--ease-salida);
+}
+.closing-copy h2 {
+    font-size: clamp(38px, 7vw, 104px);
+    line-height: 0.98;
+    text-shadow: 0 2px 30px rgba(13, 11, 10, .75);
+}
+.closing-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: clamp(30px, 4vw, 48px);
+    padding: 17px 34px;
+    background: var(--rojo);
+    color: var(--blanco);
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: background var(--t-corta) var(--ease-salida), transform var(--t-corta) var(--ease-salida);
+}
+.closing-cta:hover { background: var(--rojo-osc); transform: translateY(-2px); }
+
+/* Al final del recorrido queda sólo la marca. La frase y el botón se
+   ocultan de verdad (visibility), no sólo en opacidad: un link
+   invisible pero enfocable con el teclado sería una trampa. */
+.closing-frame.is-ended .closing-copy {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--t-media) var(--ease-salida), visibility 0s linear var(--t-media);
+}
+
+.closing-mark {
+    position: absolute;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--display);
+    font-size: clamp(44px, 9vw, 128px);
+    line-height: 1;
+    color: var(--texto-inv);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-corta) var(--ease-salida);
+}
+.closing-frame.is-ended .closing-mark {
+    opacity: 1;
+    transition: opacity var(--t-media) var(--ease-salida) var(--t-media);
+}
+
+
+/* =====================================================
+   18. FOOTER
+===================================================== */
+
+.site-footer {
+    padding: 72px 0 32px;
+    background: var(--negro);
+    color: var(--texto-inv-2);
+}
+
+.footer-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--linea-osc);
+}
+
+/* .footer-logo vive arriba, cerca de .brand: mismo lockup icono+wordmark. */
+
+.footer-inner p { font-size: 13.5px; }
+.footer-inner span { font-size: 12.5px; }
+
+/* Dirección y horarios. Con la sección de contacto eliminada, este es
+   el único lugar del sitio donde vive el dato. */
+.footer-branches { display: grid; gap: 14px; }
+.branch-card {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+}
+.branch-card h3 {
+    margin-bottom: 6px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--texto-inv);
+}
+.branch-card p { color: var(--texto-inv-2); font-size: 13px; line-height: 1.6; }
+
+
+/* =====================================================
+   19. FICHA DEL VEHÍCULO
+   (la recomposición editorial entra en el paso 5)
+===================================================== */
+
+.ficha-page {
+    background: var(--marfil);
+    padding: 132px 0 100px;
+    min-height: 100vh;
+}
+
+.ficha-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texto-2);
+    transition: color var(--t-micro) var(--ease-salida);
+}
+.ficha-back:hover { color: var(--rojo); }
+
+/* Se va la caja blanca: el vehículo se apoya en la página. División
+   asimétrica 7/5 para que la foto sea la protagonista. */
+.ficha-box {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: clamp(28px, 4vw, 72px);
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .ficha-box { grid-template-columns: 1fr; }
+}
+
+.ficha-gallery { padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ficha-main-img-wrap { position: relative; aspect-ratio: 4/3; border-radius: 0; overflow: hidden; background: var(--hueso); }
+.ficha-main-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.ficha-gal-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); border: none; cursor: pointer;
+    width: 44px; height: 44px; border-radius: 0; background: rgba(13,11,10,0.6); color: var(--texto-inv);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    transition: background var(--t-micro) var(--ease-salida);
+}
+.ficha-gal-nav:hover { background: var(--rojo); }
+.ficha-gal-prev { left: 0; }
+.ficha-gal-next { right: 0; }
+.ficha-gal-count {
+    position: absolute; right: 12px; bottom: 12px;
+    background: rgba(13,11,10,0.7); color: var(--texto-inv);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    padding: 5px 9px; border-radius: 0;
+}
+.ficha-thumbs { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 0; }
+
+/* Unidad con una sola foto: la imagen se apoya en el borde superior del
+   bloque, alineada con el nombre del vehículo. Centrarla dejaba un hueco
+   blanco arriba que leía como error. */
+@media (min-width: 901px) {
+    .ficha-gallery.is-single { justify-content: flex-start; }
+    .ficha-gallery.is-single .ficha-main-img-wrap {
+        aspect-ratio: auto;
+        height: min(100%, 660px);
+        min-height: 420px;
+    }
+}
+.ficha-thumb {
+    border: 1px solid transparent; cursor: pointer; padding: 0; aspect-ratio: 4/3; border-radius: 0;
+    background-size: cover; background-position: center; opacity: 0.55;
+    transition: opacity var(--t-micro) var(--ease-salida);
+}
+.ficha-thumb:hover { opacity: 0.8; }
+.ficha-thumb.is-active { border-color: var(--rojo); opacity: 1; }
+
+.ficha-info { padding: 0; display: flex; flex-direction: column; }
+/* El título es lo primero de la columna: antes lo precedía la marca en
+   mono (redundante, el título ya dice "Peugeot 208"), y ese margen de
+   10px era el aire que la separaba. */
+.ficha-title {
+    margin: 0;
+    font-size: clamp(30px, 3.2vw, 48px);
+    line-height: 1.02;
+}
+.ficha-price-row { display: flex; align-items: baseline; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.ficha-price { font-size: clamp(26px, 2.6vw, 38px); letter-spacing: -0.04em; }
+.ficha-oldprice { color: var(--texto-2); font-size: 16px; text-decoration: line-through; }
+
+.ficha-pills { display: flex; gap: 0; flex-wrap: wrap; margin-top: 20px; }
+.ficha-pill {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 7px 14px 7px 0;
+    margin-right: 14px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--texto-2);
+    border-right: 1px solid var(--linea);
+}
+.ficha-pill:last-child { border-right: none; margin-right: 0; }
+
+.ficha-description {
+    margin-top: 22px;
+    font-family: var(--display);
+    font-size: 19px;
+    line-height: 1.5;
+    color: var(--texto);
+    max-width: 52ch;
+}
+
+
+.ficha-specs { display: grid; grid-template-columns: 1fr 1fr; margin-top: 28px; border-top: 1px solid var(--linea); }
+.ficha-spec { padding: 14px 0; border-bottom: 1px solid var(--linea); }
+.ficha-spec:nth-child(even) { padding-left: 20px; border-left: 1px solid var(--linea); }
+.ficha-spec-k { font-size: 10px; color: var(--texto-2); }
+.ficha-spec-v { margin-top: 5px; font-size: 15px; font-weight: 500; }
+
+.ficha-actions { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+.ficha-actions a { flex: 1; min-width: 180px; }
+
+/* Banda de consulta: sale de la columna de datos, que quedaba el doble
+   de alta que la galería. */
+.ficha-contacto {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: clamp(28px, 4vw, 72px);
+    align-items: start;
+    margin-top: clamp(56px, 6vw, 96px);
+    padding-top: clamp(36px, 4vw, 56px);
+    border-top: 1px solid var(--linea);
+}
+.ficha-contacto h2 { font-size: clamp(26px, 2.8vw, 40px); max-width: 16ch; }
+.ficha-contacto .lead { font-size: 15px; margin-top: 14px; }
+
+@media (max-width: 860px) {
+    .ficha-contacto { grid-template-columns: 1fr; gap: 28px; }
+}
+
+.ficha-similares {
+    width: 100%;
+    margin: clamp(56px, 6vw, 96px) auto 0;
+    padding: 0;
+}
+.ficha-similares h3 {
+    font-size: clamp(22px, 2.2vw, 32px);
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--linea);
+}
+.ficha-similares-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.4vw, 40px); }
+
+.ficha-not-found { text-align: center; padding: 96px 20px; }
+.ficha-not-found h2 { font-size: clamp(28px, 3vw, 40px); }
+.ficha-not-found p { margin: 14px 0 28px; color: var(--texto-2); }
+
+
+/* =====================================================
+   20. RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+    .vehicles-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+    .ficha-similares-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+    .hero-menu { display: none; }
+    .hero-nav-cta { display: none; }
+    .hero-burger { display: flex; }
+
+    /* =====================================================
+       HEADER MOBILE — mismo tratamiento de cápsula que ahora usa
+       también desktop (ver regla base .hero-nav-inner): acá sólo
+       quedan las diferencias de tamaño/layout propias de mobile
+       (fila simple logo+burger en vez de la grilla de 3 columnas). --- */
+    .hero-nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(100% - 28px);
+        height: 56px;
+        padding: 0 8px 0 18px;
+        font-family: var(--sf);
+    }
+
+    /* Con scroll la cápsula queda sobre fondos claros: el burger
+       (blanco por defecto, para leerse sobre el hero) pasa a oscuro.
+       Mismo mecanismo que ya usa el menú desktop (.scrolled). El logo
+       es una imagen a color fija, no necesita cambiar. */
+    .hero-nav.scrolled .hero-burger span { background: var(--texto); }
+    .hero-nav.scrolled.over-dark .hero-burger span { background: var(--texto-inv); }
+
+    /* Isotipo + wordmark completos también en la cápsula mobile (antes
+       sólo entraba el ícono). Área de toque ampliada de forma invisible
+       para llegar a 44px sin agrandar el dibujo. */
+    .brand { position: relative; gap: 8px; }
+    .brand::after { content: ""; position: absolute; inset: -13px -10px -13px -18px; }
+    .site-logo { height: 38px; }
+
+    /* Panel del menú: extensión flotante de la misma cápsula, con
+       blur propio y transición de opacity + transform. display:flex
+       fijo (nunca "none") para que la transición pueda correr;
+       visibility hace que quede fuera del tabulado cuando está cerrado. */
+    .mobile-nav {
+        display: flex;
+        top: calc(100% + 10px);
+        left: 14px;
+        right: 14px;
+        border-radius: 20px;
+        border-bottom: none;
+        background: rgba(13, 11, 10, 0.84);
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        box-shadow:
+            0 20px 46px -18px rgba(13, 11, 10, 0.6),
+            inset 0 0 0 1px rgba(243, 239, 231, 0.12);
+        padding: 6px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px) scale(0.98);
+        transform-origin: top right;
+        pointer-events: none;
+        transition: opacity var(--t-corta) var(--ease-salida),
+                    transform var(--t-corta) var(--ease-salida),
+                    visibility 0s linear var(--t-corta);
+    }
+    .mobile-nav.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+        transition: opacity var(--t-corta) var(--ease-salida),
+                    transform var(--t-corta) var(--ease-salida),
+                    visibility 0s linear 0s;
+    }
+    .mobile-nav a {
+        border-top: none;
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-family: var(--sf);
+    }
+    .mobile-nav a:hover,
+    .mobile-nav a:focus-visible { background: rgba(243, 239, 231, 0.08); }
+
+    /* La cápsula ocupa distinto alto que la barra vieja: los anchors
+       necesitan un poco más de aire para no quedar tapados. */
+    .vehicles-section,
+    .about-section {
+        scroll-margin-top: calc(96px + env(safe-area-inset-top, 0px));
+    }
+    .results-row { scroll-margin-top: calc(112px + env(safe-area-inset-top, 0px)); }
+
+    .hero-slider {
+        height: min(86vh, 760px);
+        min-height: 520px;
+    }
+    .hero-slide { padding: 0 var(--gutter) clamp(64px, 12vh, 96px); }
+    .hero-copy { max-width: none; }
+    .hero-copy .hero-title { font-size: clamp(44px, 12vw, 72px); }
+    .hero-copy p { font-size: 15px; max-width: 34ch; }
+
+    .brand-logos { justify-content: flex-start; gap: 32px 40px; }
+    .brand-logo { width: 84px; height: 46px; }
+}
+
+/* En pantallas angostas el texto de Nosotros pasa a una columna y la
+   imagen se hace más alta: en un celular una franja 21/9 quedaría
+   como una miniatura, y esa imagen es la sección. */
+@media (max-width: 860px) {
+    .about-text { grid-template-columns: 1fr; gap: 20px; }
+    .about-media { aspect-ratio: 4 / 3; }
+    .footer-branches { gap: 10px; }
+}
+
+/* La barra de filtros baja de 6 columnas a 3 y después a 2; el botón
+   pasa a ocupar la fila entera. */
+@media (max-width: 1200px) {
+    .search-bar { grid-template-columns: repeat(3, 1fr); }
+    .search-bar .btn-blue { grid-column: 1 / -1; }
+}
+
+@media (max-width: 700px) {
+    .floating-card { flex-basis: 78vw; }
+}
+
+@media (max-width: 650px) {
+    .ficha-similares-grid { grid-template-columns: 1fr; }
+    .ficha-actions { flex-direction: column; }
+    .ficha-actions a { width: 100%; }
+    .footer-inner { flex-direction: column; align-items: flex-start; }
+    .ficha-page { padding-top: 104px; }
+
+    /* Menos aire en la escena de "Nosotros" para que el título no
+       empuje el punto de la foto que importa (rueda/habitáculo) fuera
+       de vista en pantallas bajas. */
+    /* Dos autos por fila en vez de uno: la tarjeta se achica, así que
+       el cuerpo (nombre, línea de datos, precio) se ajusta para que
+       siga entrando bien en la mitad del ancho. La foto vuelve a la
+       proporción 3/2 de base (más vertical que el 16/9 de antes, que
+       quedaba muy achatado en una columna angosta). */
+    .vehicles-grid { grid-template-columns: repeat(2, 1fr); gap: 16px 14px; }
+    .car-card-body { padding-top: 10px; margin-top: 10px; }
+    .car-card-name { font-size: 14px; }
+    .car-card-line { margin-top: 4px; font-size: 9px; }
+    .car-card-price-row { margin-top: 8px; gap: 6px; flex-wrap: wrap; }
+    .car-card-price-row .card-price { font-size: 14px; }
+    .car-card-price-row .card-oldprice { font-size: 10px; }
+    .car-card-cta { font-size: 9px; }
+}
+
+@media (max-width: 480px) {
+    .closing-cta { width: 100%; }
+    .hero-copy .hero-title { font-size: clamp(38px, 13vw, 56px); }
+}
+
+/* =====================================================
+   20c. FILTROS MOBILE
+   La grilla de 6 selects + botón se colapsa en un toggle
+   ("Filtrar vehículos" con contador de filtros activos) que
+   despliega un panel de dos columnas. Se apoya en el mismo
+   sistema de campos con línea inferior — no es un formulario
+   nuevo, es el mismo instrumento, guardado.
+===================================================== */
+@media (max-width: 800px) {
+    .search-bar {
+        display: block;
+        border-bottom: none;
+        padding: 0;
+        margin-bottom: 28px;
+    }
+
+    .filters-toggle-row { display: flex; }
+
+    .filters-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 48px;
+        padding: 0 16px;
+        background: var(--blanco);
+        border: 1px solid var(--linea-campo);
+        border-radius: var(--radio-chip);
+        font-family: var(--sans);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--texto);
+        cursor: pointer;
+        transition: border-color var(--t-micro) var(--ease-salida),
+                    color var(--t-micro) var(--ease-salida);
+    }
+    .filters-toggle[aria-expanded="true"] { border-color: var(--rojo); color: var(--rojo); }
+
+    .filters-toggle-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        background: var(--rojo);
+        color: var(--blanco);
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 999px;
+    }
+
+    .filters-toggle-icon {
+        margin-left: auto;
+        flex-shrink: 0;
+        color: var(--texto-2);
+        transition: transform var(--t-micro) var(--ease-salida);
+    }
+    .filters-toggle[aria-expanded="true"] .filters-toggle-icon { transform: rotate(180deg); color: var(--rojo); }
+
+    .filters-panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 18px;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height var(--t-media) var(--ease-salida),
+                    opacity var(--t-corta) var(--ease-salida);
+    }
+    .filters-panel.is-open {
+        max-height: 700px;
+        opacity: 1;
+        margin-top: 22px;
+        padding-top: 4px;
+        border-top: 1px solid var(--linea);
+    }
+    .filters-panel .filter-field { padding-top: 18px; }
+    .filters-panel .btn-blue { grid-column: 1 / -1; width: 100%; margin-top: 10px; }
+
+    .vehicles-grid { gap: 30px 20px; }
+}
+
+
+/* =====================================================
+   20b. REVELADO AL SCROLL
+   Un solo mecanismo para todo el sitio: opacidad y 16px de
+   desplazamiento, una sola vez. No entra nada volando ni rotando.
+   El estado inicial oculto se aplica sólo si el JS está vivo
+   (clase .js-reveal en <html>), así sin JS no se esconde nada.
+===================================================== */
+
+.js-reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity var(--t-media) var(--ease-salida),
+                transform var(--t-media) var(--ease-salida);
+}
+
+.js-reveal [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Escalonado corto dentro de un mismo lote. */
+.js-reveal [data-reveal]:nth-child(2) { transition-delay: 60ms; }
+.js-reveal [data-reveal]:nth-child(3) { transition-delay: 120ms; }
+.js-reveal [data-reveal]:nth-child(4) { transition-delay: 180ms; }
+
+
+/* =====================================================
+   21. MOVIMIENTO REDUCIDO
+   Si el sistema operativo lo pide, el sitio se queda quieto:
+   sin cortina en el hero, sin autoplay perceptible, sin
+   transiciones. Todo en su estado final.
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .hero-slide {
+        clip-path: inset(0 0 0 0);
+        transform: none;
+    }
+    .hero-slide:not(.active) { opacity: 0; }
+    .hero-slide.active { opacity: 1; }
+
+    .hero-copy .hero-title,
+    .hero-copy p,
+    .hero-copy .hero-cta,
+    .js-reveal [data-reveal] {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Aviso de unidad vendida o reservada dentro de la ficha. Discreto y en
+   el mismo registro que el resto: informa, no alarma. */
+.ficha-aviso-estado {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    background: var(--hueso);
+    border-left: 2px solid var(--rojo);
+    color: var(--texto-2);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+/* El foco por código (ficha abierta, mensaje de no disponible) no tiene
+   que dibujar el anillo del navegador: no es navegación por teclado, es
+   un anuncio para el lector de pantalla. El foco por teclado sí lo
+   conserva, porque ahí sí hace falta ver dónde se está parado.
+
+   La marca la pone enfocarSinAnillo() en ficha.js y se borra al perder
+   el foco. No alcanza con :focus:not(:focus-visible): sin interacción
+   previa del visitante, Chrome trata el foco por código como visible. */
+#fichaTitle[data-foco-silencioso]:focus,
+.ficha-not-found[data-foco-silencioso]:focus,
+#fichaTitle:focus:not(:focus-visible),
+.ficha-not-found:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+}

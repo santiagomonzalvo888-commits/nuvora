@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ⚠️ ESTE BLOQUE VA PRIMERO Y NO SE MUEVE.
+         Esta misma página se sirve en dos direcciones distintas:
+           ficha.html?v=<slug>        (archivo local, o sin rewrites)
+           /vehiculos/<slug>          (producción, vía rewrite del hosting)
+         En el segundo caso el navegador resuelve TODA ruta relativa
+         contra /vehiculos/ — o sea que css/styles.css se pediría como
+         /vehiculos/css/styles.css y daría 404, igual que el JS y que las
+         fotos del stock de demo. Un <base> insertado acá, antes de que el
+         parser llegue a cualquier <link> o <img>, las vuelve a anclar a la
+         raíz. Se agrega sólo en ese caso: con file:// un <base href="/">
+         apuntaría a la raíz del disco y rompería todo al revés. -->
+    <script>
+        if (location.protocol !== 'file:' && /^\/vehiculos\//.test(location.pathname)) {
+            var b = document.createElement('base');
+            b.href = '/';
+            document.head.appendChild(b);
+        }
+    </script>
+
+    <title id="pageTitle">Vehículo usado | CarCompany</title>
+
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <link rel="apple-touch-icon" href="assets/brand/logo.png">
+
+    <meta
+        id="pageDescription"
+        name="description"
+        content="Detalle del vehículo: precio, kilometraje, ficha técnica y contacto directo por WhatsApp. Usados seleccionados en Mar del Plata."
+    >
+
+    <!-- Canonical: arranca apuntando a esta URL genérica (sin id) y
+         js/ficha.js lo reemplaza por la URL exacta ?id=N apenas sabe
+         qué vehículo es — nunca una sola canonical fija para todas las
+         fichas, porque cada id es contenido distinto. Google ejecuta
+         ese JS de forma confiable; ver la limitación de vistas previas
+         de WhatsApp/redes explicada más abajo, en Open Graph. -->
+    <link rel="canonical" href="https://www.tu-dominio-real.com.ar/ficha.html">
+
+    <!-- Open Graph / Twitter Card.
+         Estos valores son SÓLO el punto de partida. Quién los reemplaza,
+         según cómo se sirva la página:
+
+         1. En producción, la Edge Function (netlify/edge-functions/
+            vehiculo-meta.js) intercepta /vehiculos/<slug>, busca el auto
+            y reescribe estas etiquetas en el HTML ANTES de entregarlo.
+            Es la única forma de que WhatsApp, Facebook e Instagram
+            muestren la foto y el precio del vehículo, porque esos
+            rastreadores no ejecutan JavaScript.
+
+         2. js/ficha.js las actualiza también del lado del cliente. Eso
+            cubre a Google (que sí renderiza JS) y al navegador de quien
+            abre el link, y sirve de red si la Edge Function no está.
+
+         Si alguna vez se despliega sin la Edge Function, las vistas
+         previas de WhatsApp vuelven a ser genéricas: la página se ve
+         bien igual, pero se pierde esa parte. -->
+    <!-- product: esta pagina describe UNA unidad concreta, no el sitio. -->
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="CarCompany">
+    <meta property="og:locale" content="es_AR">
+    <meta id="ogTitle" property="og:title" content="Vehículo usado | CarCompany">
+    <meta id="ogDescription" property="og:description" content="Detalle del vehículo: precio, kilometraje, ficha técnica y contacto directo por WhatsApp. Usados seleccionados en Mar del Plata.">
+    <meta id="ogImage" property="og:image" content="https://www.tu-dominio-real.com.ar/assets/images/hero-1.jpg">
+    <meta id="ogUrl" property="og:url" content="https://www.tu-dominio-real.com.ar/ficha.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta id="twitterTitle" name="twitter:title" content="Vehículo usado | CarCompany">
+    <meta id="twitterDescription" name="twitter:description" content="Detalle del vehículo: precio, kilometraje, ficha técnica y contacto directo por WhatsApp. Usados seleccionados en Mar del Plata.">
+    <meta id="twitterImage" name="twitter:image" content="https://www.tu-dominio-real.com.ar/assets/images/hero-1.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- =========================
+         NAV (igual al del hero, fijo arriba de la página)
+    ========================== -->
+
+    <header class="hero-nav scrolled">
+
+        <div class="hero-nav-inner">
+
+            <a href="index.html" class="brand">
+                <!-- Logo completo (igual que en index.html): la imagen ya
+                     trae el nombre, por eso no va wordmark aparte. -->
+                <img class="site-logo" width="186" height="104" src="assets/brand/logo.png" alt="CarCompany Auto Shop">
+            </a>
+
+            <nav class="hero-menu">
+                <a href="index.html#vehiculos">Vehículos</a>
+                <a href="index.html#nosotros">Nosotros</a>
+            </nav>
+
+            <div class="hero-nav-actions">
+                <a href="https://wa.me/5492236974817" data-wa="nav" class="hero-nav-cta">Contactar</a>
+                <button type="button" class="hero-burger" id="heroBurger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span></button>
+            </div>
+
+        </div>
+
+        <nav class="mobile-nav" id="mobileNav">
+            <a href="index.html#vehiculos">Vehículos</a>
+            <a href="index.html#nosotros">Nosotros</a>
+        </nav>
+
+    </header>
+
+
+    <!-- =========================
+         FICHA DEL VEHÍCULO
+    ========================== -->
+
+    <main class="ficha-page">
+
+        <div class="container">
+
+            <a href="index.html#vehiculos" class="ficha-back">← Volver al catálogo</a>
+
+            <!-- Se completa por js/ficha.js. Si el id de la URL no existe,
+                 se reemplaza por un mensaje de "no encontrado". -->
+            <div id="fichaContent">
+
+                <div class="ficha-box">
+
+                    <!-- La galería se adapta a la cantidad real de fotos:
+                         con una sola imagen, js/ficha.js oculta miniaturas
+                         y flechas en lugar de repetir la misma foto. -->
+                    <div class="ficha-gallery">
+                        <div class="ficha-main-img-wrap">
+                            <img id="fichaMainImg" src="" alt="">
+                            <span class="badge" id="fichaBadge" hidden></span>
+                            <button type="button" class="ficha-gal-nav ficha-gal-prev" id="fichaPrev" aria-label="Foto anterior" hidden>‹</button>
+                            <button type="button" class="ficha-gal-nav ficha-gal-next" id="fichaNext" aria-label="Foto siguiente" hidden>›</button>
+                            <span class="ficha-gal-count" id="fichaGalCount" hidden></span>
+                        </div>
+                        <div class="ficha-thumbs" id="fichaThumbs" hidden></div>
+                    </div>
+
+                    <div class="ficha-info">
+                        <h1 class="ficha-title" id="fichaTitle"></h1>
+                        <div class="ficha-price-row">
+                            <span class="ficha-price" id="fichaPrice"></span>
+                            <span class="ficha-oldprice" id="fichaOldPrice" hidden></span>
+                        </div>
+                        <!-- Cuota estimada + puente al simulador con el precio
+                             de esta unidad ya cargado (js/ficha.js arma ambos).
+                             Es el dato que la gente busca primero. -->
+                        <div class="ficha-quota" id="fichaQuota" hidden>
+                            <span class="ficha-quota-value" id="fichaQuotaValue"></span>
+                            <span class="ficha-quota-note" id="fichaQuotaNote"></span>
+                        </div>
+                        <!-- Los sellos salen de dealershipConfig.trustBadges
+                             (o del propio vehículo). Sólo debe figurar lo que
+                             la concesionaria realmente cumple. -->
+                        <div class="ficha-pills" id="fichaPills" hidden></div>
+                        <p class="ficha-description" id="fichaDescription" hidden></p>
+                        <div class="ficha-specs" id="fichaSpecs"></div>
+                        <!-- Un CTA primario y uno secundario: dos botones del
+                             mismo peso es no elegir. -->
+                        <div class="ficha-actions">
+                            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-blue" id="fichaWa">Consultar por WhatsApp</a>
+                            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-outline-dark" id="fichaWaVisit">Agendar visita</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- El formulario sale de la columna de datos y pasa a una
+                     banda propia: la columna quedaba el doble de alta que la
+                     galería y dejaba un vacío enorme al costado. -->
+                <section class="ficha-contacto" data-reveal>
+                    <div class="ficha-contacto-intro">
+                        <h2>¿Preferís que te llamemos?</h2>
+                        <p class="lead">Te contactamos una sola vez en 24 hs. Sin llamados insistentes.</p>
+                    </div>
+
+                    <div class="mini-form mini-form--standalone" id="vfBlock">
+                        <div id="vfPending">
+                            <div class="mini-form-grid">
+                                <label class="sr-only" for="vfNombre">Nombre</label>
+                                <input type="text" class="text-field" placeholder="Nombre" id="vfNombre" autocomplete="name">
+                                <label class="sr-only" for="vfTelefono">Teléfono</label>
+                                <input type="tel" class="text-field" placeholder="Teléfono" id="vfTelefono" autocomplete="tel">
+                            </div>
+                            <label class="sr-only" for="vfMensaje">Tu consulta sobre este vehículo</label>
+                            <input type="text" class="text-field mini-form-msg" placeholder="Tu consulta sobre este vehículo" id="vfMensaje">
+                            <p class="mini-form-error mini-form-msg" id="vfError" role="alert" hidden></p>
+                            <button class="btn-dark mini-form-msg" id="vfSend" type="button">Enviar consulta</button>
+                        </div>
+                        <div id="vfSuccess" class="mini-form-success" tabindex="-1" role="status" hidden><span class="check-mark">✓</span> <span id="vfSuccessMsg">Solicitud recibida. Nos vamos a contactar a la brevedad.</span></div>
+                    </div>
+                </section>
+
+            </div>
+
+            <div class="ficha-similares" id="fichaSimilares" data-reveal hidden>
+                <h3>Vehículos similares</h3>
+                <div class="ficha-similares-grid" id="fichaSimilaresGrid"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- WHATSAPP -->
+
+    <a
+        href="https://wa.me/5492236974817"
+        data-wa="flotante"
+        class="whatsapp-float"
+        aria-label="Consultar por WhatsApp"
+    >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+            <path d="M12.04 2c-5.46 0-9.9 4.43-9.9 9.88 0 1.74.46 3.45 1.32 4.95L2 22l5.3-1.39c1.45.79 3.08 1.21 4.74 1.21h.01c5.45 0 9.89-4.43 9.89-9.88 0-2.64-1.03-5.12-2.9-6.99A9.83 9.83 0 0 0 12.04 2Zm0 17.98h-.01c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.26-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29Z"/>
+        </svg>
+    </a>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <div class="footer-inner">
+
+                <div>
+                    <strong class="footer-logo">
+                        <img class="site-logo site-logo--footer" width="186" height="104" src="assets/brand/logo.png" alt="CarCompany Auto Shop">
+                    </strong>
+
+                    <p data-config="positioning">Concesionaria multimarca de usados seleccionados</p>
+                </div>
+
+                <!-- Dirección y horarios: dealershipConfig.branches. -->
+                <div class="footer-branches" id="branchList"></div>
+
+                <div>
+                    <span>
+                        © <span data-config="year">2026</span> <span data-config="name">CarCompany</span>. Todos los derechos reservados.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- Orden obligatorio: rutas.js no depende de nadie y lo usan los
+         otros tres; catalog-api.js usa funciones de catalog-data.js. -->
+    <!-- Medición. Va primero porque el resto del JS llama a Analytics.track();
+     si no hay Measurement ID configurado no carga nada y no envía nada,
+     y si un bloqueador lo corta el sitio funciona exactamente igual.
+     A propósito NO se incluye en admin/: el panel no debe ensuciar las
+     estadísticas públicas (de hecho el panel no carga ningún script de
+     js/, así que queda excluido por arquitectura, no por una regla). -->
+    <script src="js/analytics.js"></script>
+    <script src="js/rutas.js"></script>
+    <script src="js/catalog-data.js"></script>
+    <script src="js/catalog-api.js"></script>
+    <script src="js/ficha.js"></script>
+
+</body>
+</html>

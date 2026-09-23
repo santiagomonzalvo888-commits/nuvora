@@ -1,0 +1,98 @@
+/* Integración del MetallicButton (21st.dev) en .hero-cta.
+   Progressive enhancement: estas reglas sólo importan una vez que
+   js/metallic-button.js agrega la clase .is-metallic-ready (lo cual sólo
+   pasa si el navegador soporta WebGL2 y React/ReactDOM cargaron desde el
+   CDN). Si eso no ocurre, .hero-cta se queda con su degradé CSS de
+   siempre — estas reglas simplemente no se aplican a nada. */
+
+.hero-cta.is-metallic-ready {
+    background-image: none;
+    animation: none;
+}
+
+.hero-cta .mb-shell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+}
+
+/* El canvas WebGL se estira para tapar exactamente el padding-box del
+   .hero-cta (que ya define el pill: radio 999px + overflow hidden),
+   así el efecto llena el botón sin importar el largo del texto. */
+/* .hero-cta span (en styles.css) le pone font-size/line-height/transition
+   pensados para el chevron de texto a CUALQUIER <span> hijo — acá se
+   anula para mb-surface y mb-ripple, que son overlays de posición
+   absoluta y no deben moverse ni heredar tipografía. */
+.hero-cta .mb-surface,
+.hero-cta .mb-face,
+.hero-cta .mb-ripple {
+    font-size: 0;
+    line-height: normal;
+    transition: none;
+}
+.hero-cta:hover .mb-surface,
+.hero-cta:hover .mb-face,
+.hero-cta:hover .mb-ripple {
+    transform: none;
+}
+
+/* El canvas WebGL se estira para tapar exactamente el padding-box del
+   .hero-cta (que ya define el pill: radio 999px + overflow hidden),
+   así el efecto llena el botón sin importar el largo del texto. */
+.hero-cta .mb-surface {
+    position: absolute;
+    inset: -15px -28px -15px -30px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-cta .mb-surface canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Como en el componente original: el canvas queda tapado casi por
+   completo por esta cara negra, 2px más adentro que el canvas. Sólo
+   se ve un borde fino (2px) del efecto metálico animado alrededor del
+   botón — el interior queda negro y prolijo, no "todo de colores". */
+.hero-cta .mb-face {
+    position: absolute;
+    inset: -13px -26px -13px -28px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #202020 0%, #000000 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-cta .mb-label {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    line-height: normal;
+}
+
+.hero-cta .mb-ripple {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    border-radius: 50%;
+    z-index: 3;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 70%);
+    animation: mb-ripple .6s ease-out forwards;
+}
+
+@keyframes mb-ripple {
+    from { transform: scale(0); opacity: .7; }
+    to { transform: scale(4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-cta .mb-ripple { display: none; }
+}

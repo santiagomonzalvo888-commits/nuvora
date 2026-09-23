@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CarCompany | Autos usados en Mar del Plata, multimarca</title>
+
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+    <!-- Sin archivo de ícono dedicado propio: reutiliza el isotipo ya
+         publicado (256×256), que alcanza para el ícono al agregar el
+         sitio a la pantalla de inicio en iOS. No se generó ningún
+         archivo nuevo para esto. -->
+    <link rel="apple-touch-icon" href="assets/brand/logo.png">
+
+    <!-- La foto del primer slide es la imagen más pesada del primer
+         pintado (LCP): se adelanta su descarga antes de que el parser
+         llegue al <img>/background-image que la usa. Los otros tres
+         fondos del hero se cargan recién desde js/app.js, después del
+         evento load, para no competir por ancho de banda con esta. -->
+    <link rel="preload" as="image" href="assets/images/hero-1.jpg" fetchpriority="high">
+
+    <meta
+        name="description"
+        content="Concesionaria de autos usados multimarca en Mar del Plata. Vehículos seleccionados, financiación, tasamos tu usado y atención personalizada."
+    >
+
+    <!-- Canonical fijo: la home es una única URL, no depende de datos
+         dinámicos. SITE_CONFIG.baseUrl (js/catalog-data.js) es el mismo
+         placeholder que arma este dominio — reemplazar los dos juntos
+         cuando haya un dominio real. -->
+    <link rel="canonical" href="https://www.tu-dominio-real.com.ar/">
+
+    <!-- Open Graph / Twitter Card: para que WhatsApp, Facebook, Instagram
+         y X armen una vista previa correcta al compartir el link de la
+         home (esos rastreadores no ejecutan JS, así que estas etiquetas
+         van estáticas en el HTML). Usa una foto ya publicada del sitio;
+         SITE_CONFIG.ogImage (js/catalog-data.js) apunta a la misma. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CarCompany">
+    <meta property="og:locale" content="es_AR">
+    <meta property="og:title" content="CarCompany | Autos usados en Mar del Plata, multimarca">
+    <meta property="og:description" content="Concesionaria de autos usados multimarca en Mar del Plata. Vehículos seleccionados, financiación, tasamos tu usado y atención personalizada.">
+    <meta property="og:image" content="https://www.tu-dominio-real.com.ar/assets/images/hero-1.jpg">
+    <meta property="og:url" content="https://www.tu-dominio-real.com.ar/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CarCompany | Autos usados en Mar del Plata, multimarca">
+    <meta name="twitter:description" content="Concesionaria de autos usados multimarca en Mar del Plata. Vehículos seleccionados, financiación, tasamos tu usado y atención personalizada.">
+    <meta name="twitter:image" content="https://www.tu-dominio-real.com.ar/assets/images/hero-1.jpg">
+
+    <!-- Instrument Serif = display · Archivo = UI · IBM Plex Mono = dato
+         técnico. Van como <link> y no como @import dentro del CSS para que
+         el navegador no tenga que descubrirlas después de parsear la hoja. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Capa opcional para el efecto metálico de los .hero-cta (ver
+         js/metallic-button.js). Sólo se activa si el navegador soporta
+         WebGL2 y React/ReactDOM cargan bien; si no, no pasa nada — el
+         botón se queda con su degradé CSS de siempre. -->
+    <link rel="stylesheet" href="css/metallic-button.css">
+</head>
+
+<body>
+
+    <!-- =========================
+         HERO
+    ========================== -->
+
+    <main>
+
+        <section class="hero">
+
+    <div class="hero-shell">
+
+        <!-- NAV -->
+        <header class="hero-nav">
+
+            <div class="hero-nav-inner">
+
+                <a href="#" class="brand">
+                    <!-- Logo completo en assets/brand/logo.png: la imagen ya
+                         incluye el nombre, así que no va wordmark aparte. Se
+                         recoloreó al rojo de marca porque la cápsula del nav
+                         es translúcida y pasa por fondos claros y oscuros:
+                         un logo negro o blanco se perdería en la mitad. -->
+                    <img class="site-logo" width="186" height="104" src="assets/brand/logo.png" alt="CarCompany Auto Shop">
+                </a>
+
+                <nav class="hero-menu">
+                    <a href="#vehiculos">Vehículos</a>
+                    <a href="#nosotros">Nosotros</a>
+                </nav>
+
+                <div class="hero-nav-actions">
+                    <!-- initWhatsAppLinks() reemplaza este href por el link
+                         con el mensaje que corresponda. El wa.me pelado es el
+                         respaldo para quien entra sin JS: tiene que coincidir
+                         con dealershipConfig.whatsapp — lo verifica
+                         estados2-validate.js, así que si cambia el número hay
+                         que cambiarlo acá también. -->
+                    <a href="https://wa.me/5492236974817" data-wa="nav" class="hero-nav-cta">Contactar</a>
+                    <button type="button" class="hero-burger" id="heroBurger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span></button>
+                </div>
+
+            </div>
+
+            <nav class="mobile-nav" id="mobileNav">
+                <a href="#vehiculos">Vehículos</a>
+                <a href="#nosotros">Nosotros</a>
+            </nav>
+
+        </header>
+
+
+        <!-- SLIDER -->
+        <div class="hero-slider">
+
+            <div
+                class="hero-slide active"
+                style="background-image: url('assets/images/hero-1.jpg'); background-position: 72% center;"
+            >
+                <div class="hero-overlay"></div>
+
+                <div class="hero-copy">
+
+                    <h1 class="hero-title">
+                        
+                        <span class="l"><i>Hoy elegís,</i></span>
+                        <span class="l"><i>mañana manejás.</i></span>
+                    
+                    </h1>
+
+                    <p>
+                        Encontrá tu próximo vehículo entre
+                        unidades seleccionadas, financiación
+                        y atención personalizada.
+                    </p>
+
+                    <a href="#vehiculos" class="hero-cta">
+                        Ver vehículos <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+
+            <div
+                class="hero-slide"
+                data-bg="assets/images/hero-2.webp"
+                aria-hidden="true"
+            >
+                <div class="hero-overlay"></div>
+
+                <div class="hero-copy">
+
+                    <p class="hero-title">
+
+                        <span class="l"><i>Tu usado,</i></span>
+                        <span class="l"><i>tasado hoy.</i></span>
+
+                    </p>
+
+                    <p>
+                        Lo tomamos como parte de pago
+                        para que puedas dar el próximo paso.
+                    </p>
+
+                    <a href="#contacto" class="hero-cta" tabindex="-1">
+                        Cotizá tu usado <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+
+            <div
+                class="hero-slide"
+                data-bg="assets/images/hero-3.webp"
+                aria-hidden="true"
+            >
+                <div class="hero-overlay"></div>
+
+                <div class="hero-copy">
+
+                    <p class="hero-title">
+
+                        <span class="l"><i>Elegí hoy,</i></span>
+                        <span class="l"><i>pagá a tu ritmo.</i></span>
+
+                    </p>
+
+                    <p>
+                        Consultá alternativas de financiación
+                        para encontrar la opción que mejor se adapte.
+                    </p>
+
+                    <a href="#contacto" class="hero-cta" tabindex="-1">
+                        Consultá financiación <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+
+            <div
+                class="hero-slide"
+                data-bg="assets/images/hero-4.webp"
+                aria-hidden="true"
+            >
+                <div class="hero-overlay"></div>
+
+                <div class="hero-copy">
+
+                    <p class="hero-title">
+
+                        <span class="l"><i>Encontralo.</i></span>
+                        <span class="l"><i>Llevátelo.</i></span>
+
+                    </p>
+
+                    <p>
+                        Vehículos seleccionados y listos
+                        para que empieces una nueva etapa.
+                    </p>
+
+                    <a href="#vehiculos" class="hero-cta" tabindex="-1">
+                        Ver vehículos <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+
+            <div class="hero-grain"></div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- WHATSAPP -->
+
+    <a
+        href="https://wa.me/5492236974817"
+        data-wa="flotante"
+        class="whatsapp-float"
+        aria-label="Consultar por WhatsApp"
+    >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+            <path d="M12.04 2c-5.46 0-9.9 4.43-9.9 9.88 0 1.74.46 3.45 1.32 4.95L2 22l5.3-1.39c1.45.79 3.08 1.21 4.74 1.21h.01c5.45 0 9.89-4.43 9.89-9.88 0-2.64-1.03-5.12-2.9-6.99A9.83 9.83 0 0 0 12.04 2Zm0 17.98h-.01c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.26-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29Z"/>
+        </svg>
+    </a>
+
+
+    <!-- MARCAS -->
+
+    <section class="official-brands">
+
+        <!-- "Trabajamos" y no "somos oficiales": la concesionaria compra y
+             vende usados de todas las marcas, sin representación oficial.
+             Las marcas se editan en dealershipConfig.brands. -->
+        <span id="brandsLabel">Marcas que trabajamos</span>
+
+        <div class="brand-logos" id="brandLogos"></div>
+
+    </section>
+
+</section>
+
+        <!-- =========================
+             DESTACADOS
+        ========================== -->
+
+        <section class="featured-section">
+
+            <div class="container">
+
+                <div class="section-heading-row" data-reveal>
+                    <div>
+                        <h2>Rebajas y nuevos ingresos.</h2>
+                    </div>
+                    <div class="featured-controls">
+                        <a href="#vehiculos" class="link-underline">Ver todo el catálogo <span>→</span></a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Las tarjetas se generan en js/app.js (initFeaturedCarousel), a partir
+                 de los mismos datos del catálogo, para que siempre coincidan con la
+                 ficha real de cada vehículo. -->
+            <div class="featured-track" id="featuredTrack"></div>
+
+        </section>
+
+
+        <!-- =========================
+             VEHÍCULOS
+        ========================== -->
+
+        <section id="vehiculos" class="vehicles-section">
+
+            <div class="container">
+
+                <!-- Encabezado editorial: el título manda. Antes llevaba
+                     adelante un número de sección y una etiqueta; se
+                     sacaron por decorativos. -->
+                <div class="section-head" data-reveal>
+                    <div class="section-head-body">
+                        <h2>Encontrá tu próximo vehículo</h2>
+                        <p>El precio publicado es el precio final. Sin sorpresas ni costos ocultos.</p>
+                    </div>
+                </div>
+
+                <!-- Barra de herramientas apoyada en la página, no un panel
+                     flotante: los filtros son una herramienta, no una
+                     funcionalidad para lucir. Cada campo lleva su etiqueta
+                     visible en monoespaciada. -->
+                <div class="search-bar">
+
+                    <!-- Sólo se ve en mobile: colapsa los filtros en un
+                         panel. En desktop .filters-panel es
+                         "display:contents" (ver styles.css), así que sus
+                         hijos vuelven a ser ítems directos de esta grilla,
+                         exactamente como antes. -->
+                    <div class="filters-toggle-row">
+                        <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filtersPanel">
+                            <span>Filtrar vehículos</span>
+                            <span class="filters-toggle-count" id="filtersCount" hidden>0</span>
+                            <svg class="filters-toggle-icon" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="filters-panel" id="filtersPanel">
+                        <div class="filter-field">
+                            <label for="fMarca">Marca</label>
+                            <select class="select-field" id="fMarca">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="fModelo">Modelo</label>
+                            <select class="select-field" id="fModelo">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <!-- Año, precio, combustible y transmisión se completan
+                             desde el stock publicado (js/app.js): sólo aparecen
+                             las opciones que devuelven al menos un vehículo. -->
+                        <div class="filter-field">
+                            <label for="fAno">Año</label>
+                            <select class="select-field" id="fAno">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="fPrecio">Precio</label>
+                            <select class="select-field" id="fPrecio">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="fComb">Combustible</label>
+                            <select class="select-field" id="fComb">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="fTrans">Transmisión</label>
+                            <select class="select-field" id="fTrans">
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                        <button class="btn-blue" id="searchBtn" type="button">Buscar vehículos</button>
+                    </div>
+
+                </div>
+
+                <div class="results-row" id="resultsRow">
+                    <div class="results-info">
+                        <!-- aria-live: un lector de pantalla anuncia el cambio
+                             de resultados al filtrar. -->
+                        <span class="results-count" id="resultsCount" aria-live="polite" role="status"></span>
+                        <button type="button" class="link-button" id="clearFilters" hidden>Limpiar filtros</button>
+                    </div>
+                    <div>
+                        <label class="sr-only" for="sortSelect">Ordenar resultados</label>
+                        <select class="select-field select-field--sort" id="sortSelect">
+                            <option value="">Ordenar: relevancia</option>
+                            <option value="pa">Precio: menor a mayor</option>
+                            <option value="pd">Precio: mayor a menor</option>
+                            <option value="yd">Año: más nuevos primero</option>
+                            <option value="ka">Kilómetros: menos km primero</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Los skeletons van escritos en el HTML, no los pinta JS: así
+                     se ven en el primer paint, sin esperar a que bajen React ni
+                     el botón metálico (que son <script> que bloquean el parser).
+                     app.js los reemplaza por las tarjetas reales —o por el
+                     estado que corresponda— cuando llegan los datos. Ocupan el
+                     mismo alto que una tarjeta, así que no hay salto de layout.
+                     Sin JS se ocultan: ver el <noscript> de abajo. -->
+                <div id="vehicles-grid" class="vehicles-grid" data-reveal aria-busy="true">
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                    <div class="car-card car-card--skeleton" aria-hidden="true"><div class="car-card-media"></div><div class="car-card-body"><div class="sk-linea sk-linea--titulo"></div><div class="sk-linea sk-linea--dato"></div><div class="sk-linea sk-linea--precio"></div></div></div>
+                </div>
+                <noscript><style>#vehicles-grid[aria-busy="true"]{display:none}</style></noscript>
+
+                <div class="show-more-row" id="showMoreRow" hidden>
+                    <button class="btn-outline" id="showMoreBtn">Ver más vehículos</button>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             04 · NOSOTROS
+             Una pausa de confianza entre el catálogo y el cierre: una
+             imagen grande, un título y un párrafo. Nada más. Sección
+             estática a propósito — lo único que se mueve es la entrada
+             suave del bloque, que la maneja el observador de
+             [data-reveal] que ya usa toda la página.
+
+             PARA CAMBIAR EL VIDEO: reemplazar assets/video/nosotros.mp4
+             (y su poster). El poster es el cuadro que se ve mientras el
+             video carga y el que queda fijo si el sistema pide
+             movimiento reducido — conviene que sea un fotograma del
+             propio video.
+
+             El video va sin audio, en loop y con playsinline, que es lo
+             que hace que arranque solo también en iPhone. El CSS aplica
+             a .about-media > *, así que sirve igual un <img> si algún
+             día se vuelve a una foto.
+
+             El texto es editable y no afirma nada que la concesionaria
+             no pueda respaldar.
+        ========================== -->
+
+        <section id="nosotros" class="about-section">
+
+            <figure class="about-media" data-reveal>
+                <video
+                    src="assets/video/nosotros.mp4"
+                    poster="assets/video/nosotros-poster.jpg"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    aria-label="Vehículo en exhibición"
+                ></video>
+            </figure>
+
+            <div class="container about-text">
+
+                <h2 class="about-title">Elegimos cada unidad<br>como si fuera para nosotros.</h2>
+
+                <div class="about-body">
+                    <p>Compramos y vendemos usados de todas las marcas. Revisamos cada unidad antes de publicarla y mostramos precio, kilómetros y ficha real: lo que ves es lo que hay.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             05 · CIERRE
+             El remate: el auto alejándose, una frase y una acción. Al
+             final queda sólo la marca. Sin JS es una pantalla fija con
+             la imagen, la frase y el botón.
+
+             Lleva id="contacto" porque es el destino de "Contactar":
+             es el momento de la página donde está el WhatsApp. Así los
+             links que ya apuntaban ahí —el nav, el botón flotante, los
+             del hero y los de la ficha— siguen funcionando.
+        ========================== -->
+
+        <section id="contacto" class="closing-section" data-nav-dark>
+
+            <div class="closing-stage" id="closingStage">
+                <div class="closing-frame">
+
+                    <div class="closing-media" id="closingMedia">
+                        <img src="assets/images/hero-3.webp" alt="" loading="lazy" decoding="async">
+                    </div>
+
+                    <div class="closing-bars" aria-hidden="true">
+                        <span class="closing-bar closing-bar--top"></span>
+                        <span class="closing-bar closing-bar--bottom"></span>
+                    </div>
+
+                    <div class="closing-copy">
+                        <h2>Tu próximo auto<br>está más cerca.</h2>
+                        <a href="https://wa.me/5492236974817" data-wa="cierre" class="closing-cta">Hablar por WhatsApp <span aria-hidden="true">→</span></a>
+                    </div>
+
+                    <div class="closing-mark" id="closingMark" aria-hidden="true">CarCompany</div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <div class="footer-inner">
+
+                <div>
+                    <strong class="footer-logo">
+                        <img class="site-logo site-logo--footer" width="186" height="104" src="assets/brand/logo.png" alt="CarCompany Auto Shop">
+                    </strong>
+
+                    <p data-config="positioning">Concesionaria multimarca de usados seleccionados</p>
+                </div>
+
+                <!-- Dirección y horarios: salen de dealershipConfig.branches.
+                     Con la sección de contacto eliminada, este es el único
+                     lugar donde vive el dato — y una concesionaria sin
+                     dirección visible no es una concesionaria. -->
+                <div class="footer-branches" id="branchList"></div>
+
+                <div>
+                    <span>
+                        © <span data-config="year">2026</span> <span data-config="name">CarCompany</span>. Todos los derechos reservados.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- catalog-data.js trae el stock de demo y las funciones que dan forma
+         a los datos; catalog-api.js decide si el catálogo sale de Supabase
+         (lo que carga el panel) o de ese stock de demo. El orden importa:
+         catalog-api.js usa funciones definidas en catalog-data.js. -->
+    <!-- Medición. Va primero porque el resto del JS llama a Analytics.track();
+     si no hay Measurement ID configurado no carga nada y no envía nada,
+     y si un bloqueador lo corta el sitio funciona exactamente igual.
+     A propósito NO se incluye en admin/: el panel no debe ensuciar las
+     estadísticas públicas (de hecho el panel no carga ningún script de
+     js/, así que queda excluido por arquitectura, no por una regla). -->
+    <script src="js/analytics.js"></script>
+    <script src="js/rutas.js"></script>
+    <script src="js/catalog-data.js"></script>
+    <script src="js/catalog-api.js"></script>
+
+    <!-- React + ReactDOM sólo para el botón metálico del hero, cargados
+         por CDN sin build step. Es la única dependencia de framework de
+         todo el sitio, aislada a esta única mejora: si cualquiera de los
+         dos scripts no carga (sin red, CDN caído, bloqueado), js/metallic-
+         button.js lo detecta y no hace nada — el resto del sitio, incluido
+         el resto de este archivo, no depende de React para nada. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin fetchpriority="low"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin fetchpriority="low"></script>
+    <script src="js/metallic-button.js"></script>
+
+    <script src="js/app.js"></script>
+
+</body>
+</html>
