@@ -1,15 +1,1 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "comentario": [
-    "Vercel — reglas de rewrite. Va en la RAIZ del proyecto.",
-    "Las fichas se publican en /vehiculos/<slug>, que no es un archivo real:",
-    "responde ficha.html, que lee el slug de la URL. Sin esta regla, entrar",
-    "directo desde un link de WhatsApp o recargar dentro de una ficha da 404.",
-    "'rewrites' (no 'redirects') mantiene /vehiculos/<slug> en la barra."
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/vehiculos/:slug", "destination": "/ficha.html" }
-  ]
-}
+{"$schema": "https://openapi.vercel.sh/vercel.json", "cleanUrls": true, "trailingSlash": false, "rewrites": [{ "source": "/vehiculos/:slug", "destination": "/ficha.html" }]}
