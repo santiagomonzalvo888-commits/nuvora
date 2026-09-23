@@ -1,0 +1,34 @@
+# Apache / cPanel / hosting compartido — reglas de rewrite
+#
+# Va en la RAÍZ del sitio publicado (al lado de index.html).
+# Requiere que el hosting tenga mod_rewrite activo, que es lo normal en
+# cualquier cPanel. Si el panel no lo permite, la salida es poner
+# SITE_CONFIG.urlsLimpias en false dentro de js/catalog-data.js: ahí las
+# fichas pasan a ficha.html?v=<slug>, que no necesita ninguna regla.
+#
+# Qué resuelve: /vehiculos/<slug> no existe como archivo. El que responde
+# es ficha.html, que lee el slug de la URL y busca el vehículo. Sin esto,
+# entrar directo desde un link de WhatsApp o recargar dentro de una ficha
+# devolvería 404.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si la URL pedida es un archivo o una carpeta que existe de verdad
+    # (el CSS, el JS, una foto), se sirve tal cual y no se toca.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Todo lo que entre por /vehiculos/… lo atiende ficha.html.
+    # Sin [R]: es una reescritura interna, la barra del navegador sigue
+    # mostrando /vehiculos/<slug>.
+    RewriteRule ^vehiculos/[^/]+/?$ /ficha.html [L]
+</IfModule>
+
+# El panel de administración no es contenido para buscadores.
+<IfModule mod_headers.c>
+    <FilesMatch "^admin/">
+        Header set X-Robots-Tag "noindex, nofollow"
+    </FilesMatch>
+</IfModule>
